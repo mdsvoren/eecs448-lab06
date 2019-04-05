@@ -18,10 +18,12 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
 <input v-model.number="numStops" type="number" value ="10">
 
+
   <div id="app">
     <ol>
-      <li v-for="stop in stops">
-        {{ stop.name }}
+      <li v-for="stop in computed">
+        <!--{{ stop.name }}-->
+        {{  }}
       </li>
     </ol>
   </div>
@@ -62,13 +64,27 @@ function getStops()
 
 getStops();
 
+
+
   const app = new Vue({
     el: '#app',
     data: {
       stops: []
     },
+    computed: {
+      // a computed getter
+      reversedMessage: function () {
+        // `this` points to the vm instance
+        return this.message.split('').reverse().join('')
+      }
+    },
     mounted: getStops()
   })
+
+  for (i in app.stops)
+  {
+    console.log(i);
+  }
   </script>
 </body>
 </html>
