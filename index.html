@@ -21,9 +21,9 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
   <div id="app">
     <ol>
-      <li v-for="stop in computed">
-        <!--{{ stop.name }}-->
-        {{  }}
+      <li v-for="stop in filteredStops">
+        {{ stop.name }}
+        
       </li>
     </ol>
   </div>
@@ -72,18 +72,20 @@ getStops();
       stops: []
     },
     computed: {
-      // a computed getter
-      reversedMessage: function () {
-        // `this` points to the vm instance
-        return this.message.split('').reverse().join('')
-      }
+    filteredStops() {
+      return this.stops.filter(function filter2(stop) {
+        return stop.id < 10
+      })
+    }
+  
+      
     },
     mounted: getStops()
   })
 
   for (i in app.stops)
   {
-    console.log(i);
+    //console.log(i);
   }
   </script>
 </body>
