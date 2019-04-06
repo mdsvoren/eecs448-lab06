@@ -16,16 +16,21 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
 <body>
 
-<input v-model.number="numStops" type="number" value ="10">
-
+    <input v-model.number="numStops" type="number" value ="10">
 
   <div id="app">
-    <ol>
+      <br>
+    <ul>
       <li v-for="stop in filteredStops">
-        {{ stop.name }}
+          <div class="card" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="card-title">{{ stop.name }}</h5>
+                <p class="card-text">{{ stop.description }}</p>
+              </div>
+            </div>
         
       </li>
-    </ol>
+    </ul>
   </div>
 
 
