@@ -16,16 +16,18 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
 <body>
 
-    <input v-model.number="numStops" type="number" value ="10">
+    
 
   <div id="app">
+      <input v-model="numStops" type="number">
       <br>
     <ul>
       <li v-for="stop in filteredStops">
           <div class="card" style="width: 18rem;">
               <div class="card-body">
                 <h5 class="card-title">{{ stop.name }}</h5>
-                <p class="card-text">{{ stop.description }}</p>
+                <p class="card-text">{{ stop.description }}<br></p>
+                <p class="card-text">{{ stop.distance }}<br></p>
               </div>
             </div>
         
@@ -68,30 +70,59 @@ function getStops()
 }
 
 getStops();
+getLocation();
+
+function getLocation()
+{
+  if ("geolocation" in navigator) {
+  console.log("Able to find you")
+  let watchID = navigator.geolocation.watchPosition(function(position) {
+  return (position.coords.latitude);//, position.coords.longitude);
+  });
+  console.log(watchID)
+} else {
+  console.log("Not able to find you")
+}
+}
 
 
 
   const app = new Vue({
     el: '#app',
     data: {
-      stops: []
+      stops: [],
+      numStops: 10,
+      latitude: getLocation(),
+      longitude: 99999
     },
     computed: {
     filteredStops() {
-      return this.stops.filter(function filter2(stop) {
-        return stop.id < 10
+      num = this.numStops
+      return this.stops.filter(function filter2(stop) 
+      {
+        function watchLocation()
+        {
+          if ("geolocation" in navigator) {
+            this.latitude = navigator.geolocation.watchPosition(function(position) {
+                return (position.coords.latitude);
+              });
+            this.longitude = navigator.geolocation.watchPosition(function(position) {
+                return (position.coords.longitude);
+              });
+          } else {
+            console.log("Geolocation not available")
+          }
+        }
+
+
+        return stop.id < num
       })
-    }
-  
+    } 
       
     },
     mounted: getStops()
   })
 
-  for (i in app.stops)
-  {
-    //console.log(i);
-  }
   </script>
 </body>
 </html>
