@@ -56,6 +56,8 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
   <script>
 
+
+
 function getStops()
 {
   fetch('https://utils.pauliankline.com/stops.json')
@@ -69,8 +71,33 @@ function getStops()
 
 }
 
+function watchLocationLat()
+        {
+          if ("geolocation" in navigator) {
+            return navigator.geolocation.watchPosition(function(position) {
+                return (position.coords.latitude);
+              });
+           
+          } else {
+            console.log("Geolocation not available")
+          }
+        }
+
+        function watchLocationLon()
+        {
+          if ("geolocation" in navigator) {
+            return navigator.geolocation.watchPosition(function(position) {
+                return (position.coords.longitude);
+              });
+           
+          } else {
+            console.log("Geolocation not available")
+          }
+        }
+
+
 getStops();
-getLocation();
+//getLocation();
 
 function getLocation()
 {
@@ -92,29 +119,45 @@ function getLocation()
     data: {
       stops: [],
       numStops: 10,
-      latitude: getLocation(),
-      longitude: 99999
+      latitude: 99999,
+      longitude: 99998
     },
     computed: {
     filteredStops() {
       num = this.numStops
       return this.stops.filter(function filter2(stop) 
       {
-        function watchLocation()
-        {
-          if ("geolocation" in navigator) {
-            this.latitude = navigator.geolocation.watchPosition(function(position) {
-                return (position.coords.latitude);
-              });
-            this.longitude = navigator.geolocation.watchPosition(function(position) {
-                return (position.coords.longitude);
-              });
-          } else {
-            console.log("Geolocation not available")
+
+        //adapted from:
+        //https://www.geodatasource.com/developers/javascript
+        function distance(lat1, lon1, lat2, lon2, unit) {
+          if ((lat1 == lat2) && (lon1 == lon2)) 
+          {
+            return 0;
+          }
+          else {
+            let radlat1 = Math.PI * lat1/180;
+            let radlat2 = Math.PI * lat2/180;
+            let theta = lon1-lon2;
+            let radtheta = Math.PI * theta/180;
+            let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            if (dist > 1) {
+              dist = 1;
+            }
+            dist = Math.acos(dist);
+            dist = dist * 180/Math.PI;
+            dist = dist * 60 * 1.1515;
+            if (unit=="K") { dist = dist * 1.609344 }
+            if (unit=="N") { dist = dist * 0.8684 }
+            return dist;
           }
         }
 
 
+        console.log("Lat is: " + userLat)
+        let dist = distance(stop.latitude, stop.longitude, userLat, userLon)
+        console.log("Distance is: " + dist);
+        
         return stop.id < num
       })
     } 
@@ -126,3 +169,4 @@ function getLocation()
   </script>
 </body>
 </html>
+
