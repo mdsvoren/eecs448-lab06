@@ -16,7 +16,7 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
 <body>
 
-    
+
 
   <div id="app">
       <input v-model="numStops" type="number">
@@ -27,10 +27,10 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
               <div class="card-body">
                 <h5 class="card-title">{{ stop.name }}</h5>
                 <p class="card-text">{{ stop.description }}<br></p>
-                <p class="card-text">{{ stop.distance }}<br></p>
+                <p class="card-text">Distance: {{ stop.distance }} kilometers<br></p>
               </div>
             </div>
-        
+
       </li>
     </ul>
   </div>
@@ -71,47 +71,13 @@ function getStops()
 
 }
 
-function watchLocationLat()
-        {
-          if ("geolocation" in navigator) {
-            return navigator.geolocation.watchPosition(function(position) {
-                return (position.coords.latitude);
-              });
-           
-          } else {
-            console.log("Geolocation not available")
-          }
-        }
-
-        function watchLocationLon()
-        {
-          if ("geolocation" in navigator) {
-            return navigator.geolocation.watchPosition(function(position) {
-                return (position.coords.longitude);
-              });
-           
-          } else {
-            console.log("Geolocation not available")
-          }
-        }
 
 
 getStops();
-//getLocation();
 
-function getLocation()
-{
-  if ("geolocation" in navigator) {
-  console.log("Able to find you")
-  let watchID = navigator.geolocation.watchPosition(function(position) {
-  return (position.coords.latitude);//, position.coords.longitude);
-  });
-  console.log(watchID)
-} else {
-  console.log("Not able to find you")
-}
-}
 
+//stops.sort( function(a,b){return(a.distance - b.distance)})
+//return (this.stops.slice(0, this.numStops));
 
 
   const app = new Vue({
@@ -125,27 +91,33 @@ function getLocation()
     computed: {
     filteredStops() {
       num = this.numStops
-      return this.stops.filter(function filter2(stop) 
+      return this.stops.filter(function filter2(stop)
       {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.watchPosition(function(position) {
+            stop.distance =  Math.ceil(distance(position.coords.latitude, position.coords.longitude, stop.lat, stop.lon, "K") * 100) /100;
+              });
+          }
 
         //adapted from:
         //https://www.geodatasource.com/developers/javascript
         function distance(lat1, lon1, lat2, lon2, unit) {
-          if ((lat1 == lat2) && (lon1 == lon2)) 
+          if ((lat1 == lat2) && (lon1 == lon2))
           {
+            console.log("equal")
             return 0;
           }
           else {
-            let radlat1 = Math.PI * lat1/180;
-            let radlat2 = Math.PI * lat2/180;
+            let radlat1 = 3.14 * lat1/180;
+            let radlat2 = 3.14 * lat2/180;
             let theta = lon1-lon2;
-            let radtheta = Math.PI * theta/180;
+            let radtheta = 3.14 * theta/180;
             let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
             if (dist > 1) {
               dist = 1;
             }
             dist = Math.acos(dist);
-            dist = dist * 180/Math.PI;
+            dist = dist * 180/3.14;
             dist = dist * 60 * 1.1515;
             if (unit=="K") { dist = dist * 1.609344 }
             if (unit=="N") { dist = dist * 0.8684 }
@@ -154,14 +126,12 @@ function getLocation()
         }
 
 
-        console.log("Lat is: " + userLat)
-        let dist = distance(stop.latitude, stop.longitude, userLat, userLon)
-        console.log("Distance is: " + dist);
-        
+
         return stop.id < num
+
       })
-    } 
-      
+    }
+
     },
     mounted: getStops()
   })
@@ -169,4 +139,3 @@ function getLocation()
   </script>
 </body>
 </html>
-
