@@ -58,53 +58,28 @@ integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw
 
 
 
-function getStops()
-{
-  fetch('https://utils.pauliankline.com/stops.json')
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(myJson) {
-    console.log(JSON.stringify(myJson));
-    app.stops = myJson
-  });
 
+function getLocation()
+{
+  if ("geolocation" in navigator) {
+          navigator.geolocation.watchPosition(function(position) {
+           app.latitude = position.coords.latitude
+           app.longitude = position.coords.longitude
+          });
+  }
+
+  //calculate distances
+  for (let stop in app.stops)
+  {
+    app.stops[stop].distance = Math.ceil(getDistance(app.latitude, app.longitude, stop.lat, stop.lon, "K") * 100) /100;
+  }
 }
 
-
-
-getStops();
-
-
-//stops.sort( function(a,b){return(a.distance - b.distance)})
-//return (this.stops.slice(0, this.numStops));
-
-
-  const app = new Vue({
-    el: '#app',
-    data: {
-      stops: [],
-      numStops: 10,
-      latitude: 99999,
-      longitude: 99998
-    },
-    computed: {
-    filteredStops() {
-      num = this.numStops
-      return this.stops.filter(function filter2(stop)
-      {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.watchPosition(function(position) {
-            stop.distance =  Math.ceil(distance(position.coords.latitude, position.coords.longitude, stop.lat, stop.lon, "K") * 100) /100;
-              });
-          }
-
-        //adapted from:
-        //https://www.geodatasource.com/developers/javascript
-        function distance(lat1, lon1, lat2, lon2, unit) {
+function getDistance(lat1, lon1, lat2, lon2, unit) {
+       // console.log("lat1: " + lat1)
+        //console.log("lat2: " + lat2)
           if ((lat1 == lat2) && (lon1 == lon2))
           {
-            console.log("equal")
             return 0;
           }
           else {
@@ -121,19 +96,72 @@ getStops();
             dist = dist * 60 * 1.1515;
             if (unit=="K") { dist = dist * 1.609344 }
             if (unit=="N") { dist = dist * 0.8684 }
+            console.log("dist: " + dist)
             return dist;
           }
-        }
+}
 
 
 
-        return stop.id < num
+  const app = new Vue({
+    el: '#app',
+    data: {
+      stops: [],
+      numStops: 10,
+      latitude: 99999,
+      longitude: 99998
+    },
+    created: function(){
+        fetch('https://utils.pauliankline.com/stops.json')
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(myJson) {
+           //console.log(JSON.stringify(myJson));
+          for (let stop in myJson){
+            app.stops.push(myJson[stop])
+           // console.log("PUshing lat of: " + myJson[stop].lat)
+          }
+          })
+         .then(function(){
+          if ("geolocation" in navigator) {
+          navigator.geolocation.watchPosition(function(position) {
+            app.latitude = position.coords.latitude
+            app.longitude = position.coords.longitude
 
-      })
-    }
+            if (app.latitude < 90000)
+            {
+            for (let stop in app.stops)
+          {
+            stop.distance = Math.ceil(getDistance(app.latitude, app.longitude, app.stops[stop].lat, app.stops[stop].lon, "K") * 100) /100;
+            //console.log(stop.distance)
+          }
+            }
+          });        
+}
+
+            navigator.geolocation.watchPosition(function(position) {
+            app.latitude = position.coords.latitude;
+            app.longitude = position.coords.longitude;
+            for (let stop in app.stops) {
+            //   console.log("app lat: " + app.latitude)
+            //  console.log("stop lat: " + stop.lat)
+              app.stops[stop].distance = Math.ceil(getDistance(app.latitude, app.longitude, app.stops[stop].lat, app.stops[stop].lon, "K") * 100) /100;
+            }
+            });
+         });      
+
 
     },
-    mounted: getStops()
+    computed: {
+    filteredStops() {
+        this.stops.sort(function(x,y){
+          return x.distance - y.distance
+        });
+        return this.stops.slice(0, this.numStops);
+      }
+    },
+    //mounted: getStops()
   })
 
   </script>
